@@ -797,17 +797,28 @@ function choice_get_response_data($choice, $cm, $groupmode, $onlyactive) {
 
 /// Get all the recorded responses for this choice
     $rawresponses = $DB->get_records('choice_answers', array('choiceid' => $choice->id));
+   
+    return parse_choice_raw_responses($rawresponses, $allresponses);
+}
 
-/// Use the responses to move users into the correct column
-
+/**
+ * Use the responses to move users into the correct column
+ *
+ * @param $rawresponses
+ * @param $allresponses
+ * @return array
+ */
+function parse_choice_raw_responses($rawresponses, &$allresponses) {
     if ($rawresponses) {
         $answeredusers = array();
-        foreach ($rawresponses as $response) {
+        foreach ($rawresponses as $key => $response) {
             if (isset($allresponses[0][$response->userid])) {   // This person is enrolled and in correct group
+                $allresponses[0][$response->userid] = isset($allresponses[0][$response->userid]) ? $allresponses[0][$response->userid] : (object)[];
                 $allresponses[0][$response->userid]->timemodified = $response->timemodified;
                 $allresponses[$response->optionid][$response->userid] = clone($allresponses[0][$response->userid]);
                 $allresponses[$response->optionid][$response->userid]->answerid = $response->id;
                 $answeredusers[] = $response->userid;
+                $rawresponses[$key] = null;
             }
         }
         foreach ($answeredusers as $answereduser) {
