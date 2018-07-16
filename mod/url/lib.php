@@ -231,9 +231,12 @@ function url_get_coursemodule_info($coursemodule) {
     $info->icon = url_guess_icon($url->externalurl, 24);
 
     $display = url_get_final_display_type($url);
+    
+    $parsedurl = parse_url($CFG->wwwroot);
 
     if ($display == RESOURCELIB_DISPLAY_POPUP) {
-        $fullurl = "$CFG->wwwroot/mod/url/view.php?id=$coursemodule->id&amp;redirect=1";
+        $fullurl = isset($parsedurl['path']) ? $parsedurl['path'] : '';
+        $fullurl .= "/mod/url/view.php?id=$coursemodule->id&amp;redirect=1";
         $options = empty($url->displayoptions) ? array() : unserialize($url->displayoptions);
         $width  = empty($options['popupwidth'])  ? 620 : $options['popupwidth'];
         $height = empty($options['popupheight']) ? 450 : $options['popupheight'];
@@ -241,7 +244,8 @@ function url_get_coursemodule_info($coursemodule) {
         $info->onclick = "window.open('$fullurl', '', '$wh'); return false;";
 
     } else if ($display == RESOURCELIB_DISPLAY_NEW) {
-        $fullurl = "$CFG->wwwroot/mod/url/view.php?id=$coursemodule->id&amp;redirect=1";
+        $fullurl = isset($parsedurl['path']) ? $parsedurl['path'] : '';
+        $fullurl .= "/mod/url/view.php?id=$coursemodule->id&amp;redirect=1";
         $info->onclick = "window.open('$fullurl'); return false;";
 
     }
