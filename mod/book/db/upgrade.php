@@ -23,6 +23,13 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+global $keyTypeMap;
+$keyTypeMap = [
+    'primary' => XMLDB_KEY_PRIMARY,
+    'unique' => XMLDB_KEY_UNIQUE,
+    'foreign' => XMLDB_KEY_FOREIGN
+];
+
 /**
  * Book module upgrade task
  *
@@ -30,19 +37,56 @@ defined('MOODLE_INTERNAL') || die;
  * @return bool always true
  */
 function xmldb_book_upgrade($oldversion) {
-    global $CFG;
+    global $DB;
+    $dbman = $DB->get_manager();
 
-    // Automatically generated Moodle v3.2.0 release upgrade line.
-    // Put any upgrade step following this.
+    $table = install_from_xml(__DIR__ . '/install.xml', 'book_progress');
 
-    // Automatically generated Moodle v3.3.0 release upgrade line.
-    // Put any upgrade step following this.
-
-    // Automatically generated Moodle v3.4.0 release upgrade line.
-    // Put any upgrade step following this.
-
-    // Automatically generated Moodle v3.5.0 release upgrade line.
-    // Put any upgrade step following this.
+    if ($oldversion <= 2018071700) {
+        if (!$dbman->table_exists('book_progress')) {
+            $dbman->create_table($table);
+        }
+    }
 
     return true;
+}
+
+function install_from_xml($xmlfilepath, $tablename) {
+    global $keyTypeMap;
+
+    $xml = new SimpleXMLElement(file_get_contents($xmlfilepath));
+    $table = new xmldb_table($tablename);
+
+    foreach ($xml->TABLES->TABLE as $tablexml){
+        $tablenammeee = $tablexml->attributes()['NAME'];
+        if($tablexml->attributes()['NAME'] == $tablename){
+            foreach ($tablexml->FIELDS->FIELD as $field) {
+                $table->addField(new xmldb_field(
+                        $field->attributes()['NAME'],
+//                        $field->attributes()['TYPE'],
+                        1,
+                        '10,0',
+                        $field->attributes()['UNSIGNED'],
+                        $field->attributes()['NOTNULL'],
+                        $field->attributes()['SEQUENCE'],
+                        NULL,
+                        $field->attributes()['PREVIOUS']
+                    )
+                );
+            }
+
+            foreach ($tablexml->KEYS->KEY as $key) {
+                $table->addKey(new xmldb_key(
+                        $key->attributes()['NAME'],
+                        $keyTypeMap[strval($key->attributes()['TYPE'])],
+                        explode(',',$key->attributes()['FIELDS']),
+                        $key->attributes()['REFTABLE'],
+                        explode(',',$key->attributes()['REFFIELD'])
+                    )
+                );
+            }
+        }
+    }
+
+    return $table;
 }

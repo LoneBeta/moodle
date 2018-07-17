@@ -532,6 +532,36 @@ function mod_book_get_tagged_chapters($tag, $exclusivemode = false, $fromctx = 0
     }
 }
 
+function check_progress($userid, $bookid) {
+    global $DB;
+    return $DB->get_record('book_progress', ['userid' => $userid, 'bookid' => $bookid]);
+}
+
+function update_progress($userid, $bookid, $chapterid) {
+    global $DB;
+    $chapterrecord = check_progress($userid, $bookid);
+
+    if($chapterrecord && $chapterid > 0){
+        $DB->update_record('book_progress', (object)['id' => $chapterrecord->id, 'userid' => $userid, 'bookid' => $bookid, 'chapterid' => $chapterid]);
+    } else if($chapterid > 0) {
+        $DB->insert_record('book_progress',
+            (object)['userid' => $userid, 'bookid' => $bookid, 'chapterid' => $chapterid]);
+    }
+    return $chapterid;
+}
+
+function get_chapter_progress_html($cmid, $currentchapter){
+    $chapterurl = (new moodle_url("/mod/book/view.php?id={$cmid}&chapterid={$currentchapter->chapterid}"))->out();
+    return <<<EOL
+        <div class="alert alert-info" style="margin-top:70px;">
+            Want to pick up where you left off?
+            <a href=$chapterurl>
+                <button type="button" class="pull-right">Yes Please!</button>
+            </a>
+        </div>
+EOL;
+}
+
 /**
  * File browsing support class
  *

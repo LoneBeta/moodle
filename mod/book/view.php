@@ -54,6 +54,15 @@ require_capability('mod/book:read', $context);
 $allowedit  = has_capability('mod/book:edit', $context);
 $viewhidden = has_capability('mod/book:viewhiddenchapters', $context);
 
+$currentchapter = check_progress($USER->id, $book->id);
+
+$chapterredirecthtml = '';
+if ($currentchapter && $chapterid != $currentchapter->chapterid && $chapterid == 0) {
+    $chapterredirecthtml =  get_chapter_progress_html($cm->id, $currentchapter);
+}
+
+update_progress($USER->id, $book->id, $chapterid);
+
 if ($allowedit) {
     if ($edit != -1 and confirm_sesskey()) {
         $USER->editing = $edit;
@@ -211,6 +220,7 @@ book_view($book, $chapter, $islastchapter, $course, $cm, $context);
 // =====================================================
 
 echo $OUTPUT->header();
+echo $chapterredirecthtml;
 echo $OUTPUT->heading(format_string($book->name));
 
 $navclasses = book_get_nav_classes();
