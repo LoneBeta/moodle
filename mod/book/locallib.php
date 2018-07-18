@@ -532,11 +532,31 @@ function mod_book_get_tagged_chapters($tag, $exclusivemode = false, $fromctx = 0
     }
 }
 
+
+/**
+ * Retrieves the last book chapter viewed for the provided user.
+ *
+ * @param int $userid the database id of the user record
+ * @param int $bookid the database id of the book record
+ *
+ * @returns stdclass|null
+ *
+ */
 function check_progress($userid, $bookid) {
     global $DB;
     return $DB->get_record('book_progress', ['userid' => $userid, 'bookid' => $bookid]);
 }
 
+/**
+ * Update the book_progress record in the database with new "last viewed" chapter
+ *
+ * @param int $userid The database id of the user record
+ * @param int $bookid The database id of the book record
+ * @param int $chapterid The database id of the chapter record
+ *
+ * @returns int
+ *
+ */
 function update_progress($userid, $bookid, $chapterid) {
     global $DB;
     $chapterrecord = check_progress($userid, $bookid);
@@ -550,6 +570,15 @@ function update_progress($userid, $bookid, $chapterid) {
     return $chapterid;
 }
 
+/**
+ * Utility function for building the info bar for chapter "last read" navigation
+ *
+ * @param int $cmid Context module database id
+ * @param stdclass $currentchapter Db 'book_progress' record from 'check_progress()'
+ *
+ * @returns string
+ *
+ */
 function get_chapter_progress_html($cmid, $currentchapter){
     $chapterurl = new moodle_url("/mod/book/view.php?id={$cmid}&chapterid={$currentchapter->chapterid}");
     $title = get_string('bookmark_prompt', 'mod_book');
