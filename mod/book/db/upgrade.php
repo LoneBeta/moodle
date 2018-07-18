@@ -23,13 +23,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-global $keyTypeMap;
-$keyTypeMap = [
-    'primary' => XMLDB_KEY_PRIMARY,
-    'unique' => XMLDB_KEY_UNIQUE,
-    'foreign' => XMLDB_KEY_FOREIGN
-];
-
 /**
  * Book module upgrade task
  *
@@ -40,7 +33,15 @@ function xmldb_book_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    $table = install_from_xml(__DIR__ . '/install.xml', 'book_progress');
+    $table = new xmldb_table('book_progress');
+    $table->addField(new xmldb_field('id',XMLDB_TYPE_INTEGER,'10,0',true,true,true));
+    $table->addField(new xmldb_field('userid',XMLDB_TYPE_INTEGER,'10,0',true,true));
+    $table->addField(new xmldb_field('bookid',XMLDB_TYPE_INTEGER,'10,0',true,true));
+    $table->addField(new xmldb_field('chapterid',XMLDB_TYPE_INTEGER,'10,0',true,false));
+    $table->addKey(new xmldb_key('primary',XMLDB_KEY_PRIMARY,['id']));
+    $table->addKey(new xmldb_key('fk_userid',XMLDB_KEY_FOREIGN,['userid'],'user', ['id']));
+    $table->addKey(new xmldb_key('userid_bookid',XMLDB_KEY_UNIQUE,['userid,bookid']));
+    $table->addKey(new xmldb_key('fk_bookid',XMLDB_KEY_FOREIGN,['bookid'],'book', ['id']));
 
     if ($oldversion <= 2018071700) {
         if (!$dbman->table_exists('book_progress')) {
@@ -49,44 +50,4 @@ function xmldb_book_upgrade($oldversion) {
     }
 
     return true;
-}
-
-function install_from_xml($xmlfilepath, $tablename) {
-    global $keyTypeMap;
-
-    $xml = new SimpleXMLElement(file_get_contents($xmlfilepath));
-    $table = new xmldb_table($tablename);
-
-    foreach ($xml->TABLES->TABLE as $tablexml){
-        $tablenammeee = $tablexml->attributes()['NAME'];
-        if($tablexml->attributes()['NAME'] == $tablename){
-            foreach ($tablexml->FIELDS->FIELD as $field) {
-                $table->addField(new xmldb_field(
-                        $field->attributes()['NAME'],
-//                        $field->attributes()['TYPE'],
-                        1,
-                        '10,0',
-                        $field->attributes()['UNSIGNED'],
-                        $field->attributes()['NOTNULL'],
-                        $field->attributes()['SEQUENCE'],
-                        NULL,
-                        $field->attributes()['PREVIOUS']
-                    )
-                );
-            }
-
-            foreach ($tablexml->KEYS->KEY as $key) {
-                $table->addKey(new xmldb_key(
-                        $key->attributes()['NAME'],
-                        $keyTypeMap[strval($key->attributes()['TYPE'])],
-                        explode(',',$key->attributes()['FIELDS']),
-                        $key->attributes()['REFTABLE'],
-                        explode(',',$key->attributes()['REFFIELD'])
-                    )
-                );
-            }
-        }
-    }
-
-    return $table;
 }
