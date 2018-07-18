@@ -551,15 +551,14 @@ function update_progress($userid, $bookid, $chapterid) {
 }
 
 function get_chapter_progress_html($cmid, $currentchapter){
-    $chapterurl = (new moodle_url("/mod/book/view.php?id={$cmid}&chapterid={$currentchapter->chapterid}"))->out();
-    return <<<EOL
-        <div class="alert alert-info" style="margin-top:70px;">
-            Want to pick up where you left off?
-            <a href=$chapterurl>
-                <button type="button" class="pull-right">Yes Please!</button>
-            </a>
-        </div>
-EOL;
+    $chapterurl = new moodle_url("/mod/book/view.php?id={$cmid}&chapterid={$currentchapter->chapterid}");
+    $title = get_string('bookmark_prompt', 'mod_book');
+    $confirm = get_string('bookmark_confirm', 'mod_book');
+
+    return html_writer::start_div('alert alert-info', array('style' => 'margin-top:70px'))
+        . $title
+        . html_writer::link($chapterurl, html_writer::tag('button', $confirm, array('class' => 'pull-right')))
+        . html_writer::end_div();
 }
 
 /**

@@ -44,5 +44,5 @@ Feature: In a book, have the option to go back to previous chapter
     And I am on "Course 1" course homepage
     And I click on "Book 1" "link"
     And I should see "Want to pick up where you left off?"
-    When I press "Yes Please!"
+    When I press "Yes please!"
     And I should see "Chapter 2" in the "#region-main" "css_element"
