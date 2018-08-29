@@ -257,6 +257,11 @@ function get_local_referer($stripquery = true) {
 class moodle_url {
 
     /**
+     * Prefix for a placeholder URL.
+     */
+    const PLACEHOLDER_PREFIX = '@@WWWROOT@@';
+
+    /**
      * Scheme, ex.: http, https
      * @var string
      */
@@ -875,6 +880,44 @@ class moodle_url {
         } else {
             throw new coding_exception('out_as_local_url called on a non-local URL');
         }
+    }
+
+    /**
+     * Returns URL as a relative path from placeholder for $CFG->wwwroot
+     *
+     * Can be used for passing around URLs with the wwwroot stripped that may
+     * require further processing (e.g. platform URLs in cached content).
+     *
+     * @param boolean $escaped Use &amp; as params separator instead of plain &
+     * @param array $overrideparams params to add to the output url, these override existing ones with the same name.
+     * @return string Resulting URL
+     * @throws coding_exception if called on a non-local url
+     */
+    public function out_as_placeholder_url($escaped = true, array $overrideparams = null) {
+        return static::PLACEHOLDER_PREFIX
+            . $this->out_as_local_url(true, $overrideparams);
+    }
+
+    /**
+     * Replace URLs relative to current wwwroot with placeholders.
+     *
+     * @param string $text
+     * @return string
+     */
+    public static function prepare_placeholder_urls($text) {
+        global $CFG;
+        return str_replace($CFG->wwwroot, static::PLACEHOLDER_PREFIX, $text);
+    }
+
+    /**
+     * Replace URL placeholders with URLs relative to current wwwroot.
+     *
+     * @param string $text
+     * @return string
+     */
+    public static function rewrite_placeholder_urls($text) {
+        global $CFG;
+        return str_replace(static::PLACEHOLDER_PREFIX, $CFG->wwwroot, $text);
     }
 
     /**
