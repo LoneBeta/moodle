@@ -1330,7 +1330,7 @@ class cm_info implements IteratorAggregate {
     private function get_on_click() {
         // Does not need view data; may be used by navigation
         $this->obtain_dynamic_data();
-        return $this->onclick;
+        return moodle_url::rewrite_placeholder_urls($this->onclick);
     }
     /**
      * @return mixed Optional custom data stored in modinfo cache for this activity, or null if none
