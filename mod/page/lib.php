@@ -221,7 +221,8 @@ function page_get_coursemodule_info($coursemodule) {
         return $info;
     }
 
-    $fullurl = "$CFG->wwwroot/mod/page/view.php?id=$coursemodule->id&amp;inpopup=1";
+    $fullurl = new moodle_url('/mod/page/view.php', array('id' => $coursemodule->id, 'inpopup' => 1));
+    $fullurl = $fullurl->out_as_placeholder_url(true);
     $options = empty($page->displayoptions) ? array() : unserialize($page->displayoptions);
     $width  = empty($options['popupwidth'])  ? 620 : $options['popupwidth'];
     $height = empty($options['popupheight']) ? 450 : $options['popupheight'];
