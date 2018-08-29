@@ -306,7 +306,7 @@ function lti_get_coursemodule_info($coursemodule) {
     $launchcontainer = lti_get_launch_container($lti, $toolconfig);
     if ($launchcontainer == LTI_LAUNCH_CONTAINER_WINDOW) {
         $launchurl = new moodle_url('/mod/lti/launch.php', array('id' => $coursemodule->id));
-        $info->onclick = "window.open('" . $launchurl->out(false) . "', 'lti'); return false;";
+        $info->onclick = "window.open('" . $launchurl->out_as_placeholder_url(false) . "', 'lti'); return false;";
     }
 
     $info->name = $lti->name;
