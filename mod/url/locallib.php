@@ -67,7 +67,7 @@ function url_fix_submitted_url($url) {
         $url = 'http://'.$url;
     }
 
-    return $url;
+    return moodle_url::prepare_placeholder_urls($url);
 }
 
 /**

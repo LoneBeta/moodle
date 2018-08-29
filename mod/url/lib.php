@@ -217,10 +217,12 @@ function url_get_coursemodule_info($coursemodule) {
     //note: there should be a way to differentiate links from normal resources
     $info->icon = url_guess_icon($url->externalurl, 24);
 
+    $fullurl = new moodle_url('/mod/url/view.php', array('id' => $coursemodule->id));
+    $fullurl = $fullurl->out_as_placeholder_url(true, array('redirect' => 1));
+
     $display = url_get_final_display_type($url);
 
     if ($display == RESOURCELIB_DISPLAY_POPUP) {
-        $fullurl = "$CFG->wwwroot/mod/url/view.php?id=$coursemodule->id&amp;redirect=1";
         $options = empty($url->displayoptions) ? array() : unserialize($url->displayoptions);
         $width  = empty($options['popupwidth'])  ? 620 : $options['popupwidth'];
         $height = empty($options['popupheight']) ? 450 : $options['popupheight'];
@@ -228,9 +230,7 @@ function url_get_coursemodule_info($coursemodule) {
         $info->onclick = "window.open('$fullurl', '', '$wh'); return false;";
 
     } else if ($display == RESOURCELIB_DISPLAY_NEW) {
-        $fullurl = "$CFG->wwwroot/mod/url/view.php?id=$coursemodule->id&amp;redirect=1";
         $info->onclick = "window.open('$fullurl'); return false;";
-
     }
 
     if ($coursemodule->showdescription) {

@@ -41,6 +41,8 @@ if ($u) {  // Two ways to specify the module
     $url = $DB->get_record('url', array('id'=>$cm->instance), '*', MUST_EXIST);
 }
 
+$url->externalurl = moodle_url::rewrite_placeholder_urls($url->externalurl);
+
 $course = $DB->get_record('course', array('id'=>$cm->course), '*', MUST_EXIST);
 
 require_course_login($course, true, $cm);
